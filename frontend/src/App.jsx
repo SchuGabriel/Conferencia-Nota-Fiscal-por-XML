@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 function App() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -27,7 +28,7 @@ function App() {
           setProducts([]);
         } else {
           setError('');
-          setProducts(data); // Data é o array de produtos do backend
+          setProducts(data);
         }
       })
       .catch((err) => {
@@ -36,25 +37,95 @@ function App() {
       });
   };
 
+  const handleEanProd = (codeProduct, ean) => {
+    console.log("Código Manual:", codeProduct, "EAN:", ean);
+
+    const updatedProducts = products.map((item) => {
+      if (codeProduct) {
+        if (item.name.includes(codeProduct)) {
+          return {
+            ...item,
+            countQuantity: item.countQuantity + 1,
+            finalQuantity: item.predictedQuantity - (item.countQuantity + 1),
+          };
+        }
+      } else if (ean) {
+        if (item.ean === ean) {
+          return {
+            ...item,
+            countQuantity: item.countQuantity + 1,
+            finalQuantity: item.predictedQuantity - (item.countQuantity + 1),
+          };
+        }
+      }
+      return item;
+    });
+
+    setProducts(updatedProducts);
+  };
+
+  const handleReset = () => {
+    setProducts([]);
+    setError(''); 
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; 
+    }
+  };
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
       <h1>Upload de XML</h1>
-      <input type="file" accept=".xml" onChange={handleFileUpload} />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div>
+        <input
+          type="file"
+          accept=".xml"
+          onChange={handleFileUpload}
+          ref={fileInputRef} 
+        />
+        <input
+          type="text"
+          placeholder="Digite o EAN e pressione Enter"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleEanProd(null, e.target.value);
+              e.target.value = '';
+            }
+          }}
+        />
+        <label htmlFor="">Manual</label>
+        <input
+          type="text"
+          placeholder="Codigo Manual"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleEanProd(e.target.value, null);
+              e.target.value = '';
+            }
+          }}
+        />
+        <input type="button" value="Resetar" onClick={handleReset} />
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
 
       {products.length > 0 && (
         <table border="1" cellPadding="10" cellSpacing="0" style={{ marginTop: '20px', width: '100%' }}>
           <thead>
             <tr>
-              <th>Nome do Produto</th>
-              <th>Quantidade</th>
+              <th>#</th>
+              <th>Produto</th>
+              <th>Quantidade Prevista</th>
+              <th>Quantidade Contada</th>
+              <th>Total</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product, index) => (
               <tr key={index}>
-                <td>{product.name}</td>
-                <td>{product.quantity}</td>
+                <td>{index + 1}</td>
+                <td>{product.code + " " + product.name}</td>
+                <td>{product.predictedQuantity}</td>
+                <td>{product.countQuantity}</td>
+                <td>{product.finalQuantity}</td>
               </tr>
             ))}
           </tbody>
