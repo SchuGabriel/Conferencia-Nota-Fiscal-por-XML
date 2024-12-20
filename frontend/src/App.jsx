@@ -39,10 +39,11 @@ function App() {
 
   const handleEanProd = (codeProduct, ean) => {
     console.log("Código Manual:", codeProduct, "EAN:", ean);
-
+    let product;
     const updatedProducts = products.map((item) => {
+      product = item.code + " " + item.name;
       if (codeProduct) {
-        if (item.name.includes(codeProduct)) {
+        if (product.includes(codeProduct)) {
           return {
             ...item,
             countQuantity: item.countQuantity + 1,
@@ -60,15 +61,26 @@ function App() {
       }
       return item;
     });
-
     setProducts(updatedProducts);
   };
 
   const handleReset = () => {
-    setProducts([]);
-    setError(''); 
+    if (!confirm("Deseja resetar?")) {
+      return;
+    }
+
+    const resetProducts = products.map((item) => {
+      return {
+        ...item,
+        countQuantity: 0,
+        finalQuantity: 0,
+      }
+    });
+    
+    setProducts(resetProducts);
+    setError('');
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; 
+      fileInputRef.current.value = '';
     }
   };
 
@@ -80,7 +92,7 @@ function App() {
           type="file"
           accept=".xml"
           onChange={handleFileUpload}
-          ref={fileInputRef} 
+          ref={fileInputRef}
         />
         <input
           type="text"
@@ -103,7 +115,7 @@ function App() {
             }
           }}
         />
-        <input type="button" value="Resetar" onClick={handleReset} />
+        <input type="button" value="Resetar Nota" onClick={handleReset} />
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
