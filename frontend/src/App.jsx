@@ -38,7 +38,6 @@ function App() {
   };
 
   const handleEanProd = (codeProduct, ean) => {
-    console.log("Código Manual:", codeProduct, "EAN:", ean);
     let product;
     const updatedProducts = products.map((item) => {
       product = item.code + " " + item.name;
@@ -134,8 +133,8 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.pos}>
+            {products.map((product, index) => (
+              <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{product.code + " " + product.name}</td>
                 <td>{product.predictedQuantity}</td>

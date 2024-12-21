@@ -29,7 +29,6 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
 
       try {
         const prod = result.nfeProc.NFe.infNFe.det.map((item) => ({
-          pos: item.prod.nItemPed,
           code: item.prod.cProd,
           name: item.prod.xProd.substring(0, 40),
           predictedQuantity: parseFloat(item.prod.qCom),
