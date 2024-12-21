@@ -34,7 +34,7 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
           predictedQuantity: parseFloat(item.prod.qCom),
           ean: item.prod.cEAN,
           countQuantity: 0,
-          finalQuantity: 0,
+          finalQuantity: parseFloat(item.prod.qCom) * -1,
         }));
 
         products = prod;

@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import icon_green from './assets/images/icons/im_green.png';
+import icon_red from './assets/images/icons/im_red.png';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -140,6 +142,7 @@ function App() {
           <thead>
             <tr>
               <th>#</th>
+              <th>Status</th>
               <th>Produto</th>
               <th>Quantidade Prevista</th>
               <th>Quantidade Contada</th>
@@ -151,6 +154,7 @@ function App() {
             {products.map((product, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
+                <td>{product.finalQuantity === 0 ? <img src={icon_green}/> : <img src={icon_red}/>}</td>
                 <td>{product.code + " " + product.name}</td>
                 <td>{product.predictedQuantity}</td>
                 <td>{product.countQuantity}</td>
