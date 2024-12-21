@@ -46,7 +46,7 @@ function App() {
           return {
             ...item,
             countQuantity: item.countQuantity + 1,
-            finalQuantity: item.predictedQuantity - (item.countQuantity + 1),
+            finalQuantity: (item.countQuantity + 1) - item.predictedQuantity,
           };
         }
       } else if (ean) {
@@ -54,7 +54,7 @@ function App() {
           return {
             ...item,
             countQuantity: item.countQuantity + 1,
-            finalQuantity: item.predictedQuantity - (item.countQuantity + 1),
+            finalQuantity: (item.countQuantity + 1) - item.predictedQuantity,
           };
         }
       }
@@ -82,6 +82,20 @@ function App() {
       fileInputRef.current.value = '';
     }
   };
+
+  const handleButtonCount = (action, index) => {
+    const updatedProducts = [...products]
+    
+    if (action){
+      updatedProducts[index].countQuantity += 1;
+      } else {
+      updatedProducts[index].countQuantity -= 1;
+    }
+
+    updatedProducts[index].finalQuantity = updatedProducts[index].countQuantity - updatedProducts[index].predictedQuantity;
+
+    setProducts(updatedProducts);
+  }
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
@@ -130,6 +144,7 @@ function App() {
               <th>Quantidade Prevista</th>
               <th>Quantidade Contada</th>
               <th>Total</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -140,6 +155,10 @@ function App() {
                 <td>{product.predictedQuantity}</td>
                 <td>{product.countQuantity}</td>
                 <td>{product.finalQuantity}</td>
+                <td>
+                  <button type="button" onClick={ () => handleButtonCount(true, index)}>+</button>
+                  <button type="button" onClick={ () => handleButtonCount(false, index)}>-</button>
+                </td>
               </tr>
             ))}
           </tbody>
