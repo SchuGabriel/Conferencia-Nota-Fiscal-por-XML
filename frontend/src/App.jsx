@@ -76,7 +76,7 @@ function App() {
         finalQuantity: 0,
       }
     });
-    
+
     setProducts(resetProducts);
     setError('');
     if (fileInputRef.current) {
@@ -104,17 +104,20 @@ function App() {
             }
           }}
         />
-        <label htmlFor="">Manual</label>
-        <input
-          type="text"
-          placeholder="Codigo Manual"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleEanProd(e.target.value, null);
-              e.target.value = '';
-            }
-          }}
-        />
+        <label>
+          {' '}Manual
+          <input
+            type="text"
+            placeholder="Codigo Manual"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleEanProd(e.target.value, null);
+                e.target.value = '';
+              }
+            }}
+          />
+        </label>
+
         <input type="button" value="Resetar Nota" onClick={handleReset} />
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
@@ -131,8 +134,8 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product, index) => (
-              <tr key={index}>
+            {products.map((product) => (
+              <tr key={product.pos}>
                 <td>{index + 1}</td>
                 <td>{product.code + " " + product.name}</td>
                 <td>{product.predictedQuantity}</td>
