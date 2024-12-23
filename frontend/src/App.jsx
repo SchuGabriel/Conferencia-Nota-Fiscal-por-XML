@@ -1,9 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 import icon_green from './assets/images/icons/im_green.png';
 import icon_red from './assets/images/icons/im_red.png';
 
 function App() {
   const [products, setProducts] = useState([]);
+  const [NF, setNF] = useState({ number: '', serial: '' });
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
@@ -28,9 +32,16 @@ function App() {
         if (data.error) {
           setError(data.error);
           setProducts([]);
+          setNF('');
         } else {
           setError('');
-          setProducts(data);
+          setProducts(data.prod);
+          setNF({
+            number: data.nf.number,
+            serial: data.nf.serial
+          });
+          console.log(data);
+          console.log(NF);
         }
       })
       .catch((err) => {
@@ -87,16 +98,58 @@ function App() {
 
   const handleButtonCount = (action, index) => {
     const updatedProducts = [...products]
-    
-    if (action){
+    if (action) {
       updatedProducts[index].countQuantity += 1;
-      } else {
+    } else {
       updatedProducts[index].countQuantity -= 1;
     }
 
     updatedProducts[index].finalQuantity = updatedProducts[index].countQuantity - updatedProducts[index].predictedQuantity;
 
     setProducts(updatedProducts);
+  }
+
+  const handleCheck = () => {
+    const CurrentProducts = [...products];
+    let productfailed = [];
+
+    products.forEach((item) => {
+      if (item.finalQuantity !== 0) {
+        productfailed.push(item.pos - 1);
+      }
+    });
+
+    if (productfailed.length > 0) {
+      const doc = new jsPDF();
+
+      let title = "Itens com divergência - Nota Fiscal: " + NF.number + " Serie: " + NF.serial;
+      doc.setFontSize(12);
+      doc.text(title, 50, 10);
+
+      const tableData = productfailed.map((item) => {
+        const product = CurrentProducts[item];
+        const status =
+          product.finalQuantity < 0
+            ? `Faltou: ${Math.abs(product.finalQuantity)}`
+            : `Sobrou: ${Math.abs(product.finalQuantity)}`;
+
+        return [product.name, status];
+      });
+
+      doc.autoTable({
+        head: [["Produto", "Situação"]],
+        body: tableData,
+        startY: 20,
+      });
+
+      doc.save("divergencias.pdf");
+    }
+
+    setProducts('');
+    setError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   return (
@@ -134,6 +187,9 @@ function App() {
         </label>
 
         <input type="button" value="Resetar Nota" onClick={handleReset} />
+
+        <input type="button" value="Finalizar Conferencia" onClick={handleCheck} />
+
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
@@ -151,17 +207,17 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{product.finalQuantity === 0 ? <img src={icon_green}/> : <img src={icon_red}/>}</td>
+            {products.map((product) => (
+              <tr key={product.pos}>
+                <td>{product.pos}</td>
+                <td>{product.finalQuantity === 0 ? <img src={icon_green} /> : <img src={icon_red} />}</td>
                 <td>{product.code + " " + product.name}</td>
                 <td>{product.predictedQuantity}</td>
                 <td>{product.countQuantity}</td>
                 <td>{product.finalQuantity}</td>
                 <td>
-                  <button type="button" onClick={ () => handleButtonCount(true, index)}>+</button>
-                  <button type="button" onClick={ () => handleButtonCount(false, index)}>-</button>
+                  <button type="button" onClick={() => handleButtonCount(true, product.pos - 1)}>+</button>
+                  <button type="button" onClick={() => handleButtonCount(false, product.pos - 1)}>-</button>
                 </td>
               </tr>
             ))}

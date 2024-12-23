@@ -20,7 +20,11 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
 
     const xmlContent = req.file.buffer.toString();
 
-    const parser = new xml2js.Parser({ explicitArray: false });
+    const parser = new xml2js.Parser({
+      explicitArray: false, // Evita arrays desnecessários
+      tagNameProcessors: [name => name.replace(/^.*:/, '')], // Remove namespaces
+    });
+
     parser.parseString(xmlContent, (err, result) => {
       if (err) {
         console.error('Erro ao analisar o XML:', err.message);
@@ -28,7 +32,8 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
       }
 
       try {
-        const prod = result.nfeProc.NFe.infNFe.det.map((item) => ({
+        const prod = result.nfeProc.NFe.infNFe.det.map((item, index) => ({
+          pos: index + 1,
           code: item.prod.cProd,
           name: item.prod.xProd.substring(0, 40),
           predictedQuantity: parseFloat(item.prod.qCom),
@@ -37,9 +42,14 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
           finalQuantity: parseFloat(item.prod.qCom) * -1,
         }));
 
+        const nf = {
+          number: result.nfeProc.NFe.infNFe.ide.nNF,
+          serial: result.nfeProc.NFe.infNFe.ide.serie,
+        };
+
         products = prod;
 
-        res.json(prod);
+        res.json({nf, prod});
       } catch (error) {
         console.error('Erro ao processar os produtos:', error.message);
         res.status(500).json({ error: 'Erro ao processar os produtos no XML.' });
