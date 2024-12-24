@@ -220,17 +220,23 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>Upload de XML</h1>
-      <div>
+    <div className="container d-flex flex-column justify-content-center align-items-center mt-4">
+      <h1 className="mb-4">Upload de XML</h1>
+
+      <div className="mb-3">
         <input
           type="file"
           accept=".xml"
+          className="form-control"
           onChange={handleFileUpload}
           ref={fileInputRef}
         />
+      </div>
+
+      <div className="input-group mb-3">
         <input
           type="text"
+          className="form-control"
           placeholder="Digite o EAN e pressione Enter"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -239,98 +245,110 @@ function App() {
             }
           }}
         />
-        <label>
-          {' '}Manual
-          <input
-            type="text"
-            placeholder="Codigo Manual"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleEanProd(e.target.value, null);
-                e.target.value = '';
-              }
-            }}
-          />
-        </label>
-
-        <input type="button" value="Resetar Nota" onClick={handleReset} />
-
-        <input type="button" value="Finalizar Conferencia" onClick={handleCheck} />
-
-        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
+      <div className="input-group mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Código Manual"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleEanProd(e.target.value, null);
+              e.target.value = '';
+            }
+          }}
+        />
+      </div>
+
+      <button className="btn btn-warning me-2" onClick={handleReset}>
+        Resetar Nota
+      </button>
+      <button className="btn btn-success" onClick={handleCheck}>
+        Finalizar Conferência
+      </button>
+
+      {error && <p className="text-danger mt-3">{error}</p>}
+
       {products.length > 0 && (
-        <div>
-          <div>
-            <table border="1" cellPadding="10" cellSpacing="0" style={{ marginTop: '20px', width: '100%' }}>
-              <thead>
-                <tr>
-                  <th colSpan={7}>Produtos Esperados</th>
-                </tr>
-                <tr>
-                  <th>#</th>
-                  <th>Status</th>
-                  <th>Produto</th>
-                  <th>Quantidade Prevista</th>
-                  <th>Quantidade Contada</th>
-                  <th>Total</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.pos}>
-                    <td>{product.pos}</td>
-                    <td>{product.finalQuantity === 0 ? <img src={icon_green} /> : <img src={icon_red} />}</td>
-                    <td>{product.code + " " + product.name}</td>
-                    <td>{product.predictedQuantity}</td>
-                    <td>{product.countQuantity}</td>
-                    <td>{product.finalQuantity}</td>
-                    <td>
-                      <button type="button" onClick={() => handleButtonCount(1, product.pos - 1, true)}>+</button>
-                      <button type="button" onClick={() => handleButtonCount(2, product.pos - 1, true)}>-</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <table className="table table-bordered mt-4">
+          <thead className="table-dark">
+            <tr>
+              <th colSpan={7}>Produtos Esperados</th>
+            </tr>
+            <tr>
+              <th>#</th>
+              <th>Status</th>
+              <th>Produto</th>
+              <th>Quantidade Prevista</th>
+              <th>Quantidade Contada</th>
+              <th>Total</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product.pos}>
+                <td>{product.pos}</td>
+                <td>
+                  {product.finalQuantity === 0 ? (
+                    <img src={icon_green} alt="OK" />
+                  ) : (
+                    <img src={icon_red} alt="Erro" />
+                  )}
+                </td>
+                <td>{product.code + " " + product.name}</td>
+                <td>{product.predictedQuantity}</td>
+                <td>{product.countQuantity}</td>
+                <td>{product.finalQuantity}</td>
+                <td>
+                  <button className="btn btn-sm btn-primary me-1" onClick={() => handleButtonCount(1, product.pos - 1, true)}>
+                    +
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleButtonCount(2, product.pos - 1, true)}>
+                    -
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       {unexpectedProducts.length > 0 && (
-        <div>
-          <table border="1" cellPadding="10" cellSpacing="0" style={{ marginTop: '20px', width: '100%' }}>
-            <thead>
-              <tr>
-                <th colSpan={4}>
-                  Produtos Inesperados
-                </th>
+        <table className="table table-bordered mt-4">
+          <thead>
+            <tr>
+              <th colSpan={4}>Produtos Inesperados</th>
+            </tr>
+            <tr>
+              <th>#</th>
+              <th>Produto</th>
+              <th>Quantidade Contada</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {unexpectedProducts.map((product) => (
+              <tr key={product.pos}>
+                <td>{product.pos}</td>
+                <td>{product.name}</td>
+                <td>{product.countQuantity}</td>
+                <td>
+                  <button className="btn btn-sm btn-success me-1" onClick={() => handleButtonCount(1, product.pos - 1, false)}>
+                    +
+                  </button>
+                  <button className="btn btn-sm btn-warning me-1" onClick={() => handleButtonCount(2, product.pos - 1, false)}>
+                    -
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleButtonCount(3, product.pos - 1, false)}>
+                    x
+                  </button>
+                </td>
               </tr>
-              <tr>
-                <th>#</th>
-                <th>Produto</th>
-                <th>Quantidade Contada</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {unexpectedProducts.map((product) => (
-                <tr key={product.pos}>
-                  <td>{product.pos}</td>
-                  <td>{product.name}</td>
-                  <td>{product.countQuantity}</td>
-                  <td>
-                    <button type="button" onClick={() => handleButtonCount(1, product.pos - 1, false)}>+</button>
-                    <button type="button" onClick={() => handleButtonCount(2, product.pos - 1, false)}>-</button>
-                    <button type="button" onClick={() => handleButtonCount(3, product.pos - 1, false)}>x</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
