@@ -21,8 +21,8 @@ app.post('/upload-xml', upload.single('file'), (req, res) => {
     const xmlContent = req.file.buffer.toString();
 
     const parser = new xml2js.Parser({
-      explicitArray: false, // Evita arrays desnecessários
-      tagNameProcessors: [name => name.replace(/^.*:/, '')], // Remove namespaces
+      explicitArray: false, 
+      tagNameProcessors: [name => name.replace(/^.*:/, '')], 
     });
 
     parser.parseString(xmlContent, (err, result) => {
